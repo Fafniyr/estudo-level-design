@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tratado de Level Design: Metroidvania Sombrio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        parchment: '#F9F7F2',
+                        ink: '#1E1E1E',
+                        blood: '#630C0C',
+                        slate: '#4A5568',
+                        bronze: '#3B4A3D'
+                    },
+                    fontFamily: {
+                        serif: ['"Crimson Text"', 'Georgia', 'serif'],
+                        sans: ['"Inter"', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;700&display=swap');
+        
+        body { background-color: #F9F7F2; color: #1E1E1E; }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 450px;
+            max-height: 500px;
+        }
+
+        .chapter-btn {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .chapter-btn.active {
+            border-bottom-color: #630C0C;
+            color: #630C0C;
+            font-weight: bold;
+        }
+
+        .scroll-custom::-webkit-scrollbar { width: 6px; }
+        .scroll-custom::-webkit-scrollbar-track { background: #F9F7F2; }
+        .scroll-custom::-webkit-scrollbar-thumb { background: #1E1E1E; border-radius: 10px; }
+
+        .gate-card {
+            transition: transform 0.2s ease;
+        }
+        .gate-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(30, 30, 30, 0.1);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased overflow-hidden h-screen flex flex-col">
+
+    <!-- Header / Navigation -->
+    <header class="bg-white border-b border-ink/10 py-4 px-8 flex justify-between items-center z-50 shadow-sm">
+        <div>
+            <h1 class="text-xl font-serif font-bold uppercase tracking-tighter text-blood">Metroidvania Design Corpus</h1>
+            <p class="text-xs text-slate uppercase tracking-widest font-bold">Estudo de Caso: Fantasia Sombria & Sobrevivência</p>
+        </div>
+        <nav class="hidden lg:flex gap-6">
+            <button onclick="changeChapter(0)" class="chapter-btn text-sm active" id="btn-0">01. Ontologia</button>
+            <button onclick="changeChapter(1)" class="chapter-btn text-sm" id="btn-1">02. Topologia</button>
+            <button onclick="changeChapter(2)" class="chapter-btn text-sm" id="btn-2">03. Micro-Design</button>
+            <button onclick="changeChapter(3)" class="chapter-btn text-sm" id="btn-3">04. Psicometria</button>
+            <button onclick="changeChapter(4)" class="chapter-btn text-sm" id="btn-4">05. Narrativa</button>
+        </nav>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Left Panel: Text & Theory -->
+        <aside class="w-full lg:w-2/5 p-8 overflow-y-auto scroll-custom border-r border-ink/5 bg-parchment">
+            <div id="content-area" class="space-y-6 animate-fade-in">
+                <!-- Content will be injected here -->
+            </div>
+        </aside>
+
+        <!-- Right Panel: Interactive Data/Viz -->
+        <section class="hidden lg:flex flex-1 flex-col p-8 bg-white/50 overflow-y-auto scroll-custom">
+            <div id="viz-area" class="h-full flex flex-col items-center justify-center space-y-8">
+                <!-- Visualizations will be injected here -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Status -->
+    <footer class="bg-ink text-parchment text-[10px] px-8 py-2 flex justify-between uppercase tracking-widest">
+        <span>© 2026 Tratado de Arquitetura de Jogos</span>
+        <span id="chapter-indicator">Capítulo I: Fundamentos do Gênero</span>
+    </footer>
+
+    <script>
+        const chapterData = [
+            {
+                title: "Capítulo I: Ontologia e Hibridização",
+                indicator: "Capítulo I: Fundamentos do Gênero",
+                theory: `
+                    <h2 class="text-3xl font-serif font-bold text-ink mb-4">A Síntese da Opressão</h2>
+                    <p class="text-slate leading-relaxed mb-4">
+                        Para criar um Metroidvania que ressoe com o horror de <em>Fear & Hunger</em> e a precisão de <em>Souls</em>, devemos entender que a exploração não é um prazer, mas um risco necessário. Enquanto <em>Ori</em> foca na alegria do movimento (Kinaesthetics), o seu design deve focar na <strong>agonia da vulnerabilidade</strong>.
+                    </p>
+                    <div class="bg-blood/5 p-4 border-l-4 border-blood mb-6 italic">
+                        "O mundo não é um playground; é um cemitério que ainda não terminou de ser cavado."
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Pilares de Design</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-2">
+                            <span class="text-blood font-bold">01.</span>
+                            <span><strong>Combate Punitivo:</strong> Cada inimigo deve ter o potencial de encerrar a run. O Level Design deve refletir isso com arenas que oferecem vantagens ambientais.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-blood font-bold">02.</span>
+                            <span><strong>Escassez de Informação:</strong> O mapa não deve ser revelado por um NPC, mas preenchido pelo sangue e suor do jogador.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-blood font-bold">03.</span>
+                            <span><strong>Gestão de Recursos:</strong> Distância do Save Point = Aumento Exponencial do Medo.</span>
+                        </li>
+                    </ul>
+                `,
+                viz: `
+                    <div class="w-full space-y-6">
+                        <div class="glass-panel p-6 rounded-lg">
+                            <h4 class="text-center font-bold mb-4 uppercase text-xs tracking-widest">Comparação de Sistemas: O Desvio Souls-vania</h4>
+                            <div class="chart-container">
+                                <canvas id="radarChart"></canvas>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate italic max-w-md text-center mx-auto">
+                            Observe o aumento radical em "Opressão" e "Punição" no modelo alvo em comparação ao gênero tradicional (Vanias clássicos).
+                        </p>
+                    </div>
+                `
+            },
+            {
+                title: "Capítulo II: Topologia e Interconectividade",
+                indicator: "Capítulo II: O Mapa como Organismo",
+                theory: `
+                    <h2 class="text-3xl font-serif font-bold text-ink mb-4">Arquitetura de Atalhos</h2>
+                    <p class="text-slate leading-relaxed mb-4">
+                        Diferente de <em>Hollow Knight</em>, onde a interconectividade é vasta e aérea, um Metroidvania Sombrio deve ser <strong>claustrofóbico e recursivo</strong>. O mapa deve se "dobrar" sobre si mesmo.
+                    </p>
+                    <h3 class="text-xl font-bold mb-2">A Matemática do Atalho</h3>
+                    <p class="text-slate mb-4">
+                        Um atalho em um Souls-like não é apenas conveniência; é a <strong>moeda de progresso</strong>. Se o jogador atravessa 10 salas letais para abrir uma porta de volta ao HUB, ele não ganhou poder, ele ganhou <em>segurança</em>.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="p-4 bg-ink text-white rounded">
+                            <h4 class="font-bold text-xs uppercase mb-1">Ponto de Tensão A</h4>
+                            <p class="text-[10px]">Início da zona. Recursos 100%.</p>
+                        </div>
+                        <div class="p-4 bg-blood text-white rounded">
+                            <h4 class="font-bold text-xs uppercase mb-1">Ponto de Tensão B</h4>
+                            <p class="text-[10px]">Pré-atalho. Recursos <20%. Medo máximo.</p>
+                        </div>
+                    </div>
+                    <p class="text-slate text-sm">A "Geometria da Catarse" ocorre no momento exato em que o jogador reconhece um local visitado há 2 horas atrás.</p>
+                `,
+                viz: `
+                    <div class="w-full flex flex-col items-center">
+                        <h4 class="font-bold mb-6 uppercase text-xs tracking-widest">Matriz de Conectividade e Bloqueio</h4>
+                        <div class="grid grid-cols-4 grid-rows-4 gap-4 w-96 h-96 relative">
+                            <!-- CSS Grid Diagram -->
+                            <div class="border-2 border-ink flex items-center justify-center font-bold text-blood">HUB</div>
+                            <div class="border border-ink/20 flex items-center justify-center text-[10px] text-slate">Zona 1</div>
+                            <div class="border border-ink/20 flex items-center justify-center text-[10px] text-slate">Zona 2</div>
+                            <div class="border-2 border-blood flex items-center justify-center text-[10px] font-bold">BOSS</div>
+                            
+                            <div class="border border-ink/20 bg-ink/5"></div>
+                            <div class="border-b-4 border-blood flex items-center justify-center text-[8px] bg-blood/10">PORTA TRANCADA</div>
+                            <div class="border border-ink/20"></div>
+                            <div class="border border-ink/20"></div>
+                            
+                            <div class="border border-ink/20"></div>
+                            <div class="border border-ink/20"></div>
+                            <div class="border border-ink/20 flex items-center justify-center text-[10px] text-blood">SHORTCUT</div>
+                            <div class="border border-ink/20"></div>
+                            
+                            <div class="border border-ink/20 flex items-center justify-center text-[10px] text-slate italic">ABISMO</div>
+                            <div class="border border-ink/20"></div>
+                            <div class="border border-ink/20"></div>
+                            <div class="border border-ink/20"></div>
+
+                            <!-- Connection lines using absolute positioning -->
+                            <div class="absolute top-[12%] left-[25%] w-10 h-1 bg-ink"></div>
+                            <div class="absolute top-[25%] left-[12%] w-1 h-10 bg-ink"></div>
+                            <div class="absolute bottom-[25%] right-[25%] w-1 h-32 border-l-2 border-dashed border-blood"></div>
+                        </div>
+                        <p class="mt-8 text-sm text-center max-w-sm text-slate">
+                            Visualização simplificada da "Recursividade Vertical". O jogador desce até o Abismo apenas para encontrar um elevador oculto que o traz de volta ao HUB inicial.
+                        </p>
+                    </div>
+                `
+            },
+            {
+                title: "Capítulo III: Micro-Design e Gating",
+                indicator: "Capítulo III: A Anatomia da Sala",
+                theory: `
+                    <h2 class="text-3xl font-serif font-bold text-ink mb-4">Oclusão e Gating</h2>
+                    <p class="text-slate leading-relaxed mb-4">
+                        No micro-design (sala por sala), usamos a técnica de <strong>Oclusão Visual</strong> para esconder perigos. Diferente de <em>Ori</em>, onde você vê o destino, aqui o destino é um mistério.
+                    </p>
+                    <h3 class="text-xl font-bold mb-4 italic text-blood">Tipos de "Gatilhos" (Gating)</h3>
+                    <div class="space-y-4">
+                        <div class="gate-card p-4 bg-white border border-ink/10 rounded shadow-sm">
+                            <h4 class="font-bold">1. Hard Gate (Habilidade)</h4>
+                            <p class="text-xs text-slate">Ex: Dash Sombrio para passar por paredes de névoa. O padrão Metroidvania.</p>
+                        </div>
+                        <div class="gate-card p-4 bg-white border border-ink/10 rounded shadow-sm">
+                            <h4 class="font-bold">2. Soft Gate (Habilidade/Atributo)</h4>
+                            <p class="text-xs text-slate">Ex: Uma área extremamente escura (necessita item de luz) ou tóxica (necessita resistência).</p>
+                        </div>
+                        <div class="gate-card p-4 bg-white border border-ink/10 rounded shadow-sm">
+                            <h4 class="font-bold">3. Knowledge Gate (Conhecimento)</h4>
+                            <p class="text-xs text-slate">Ex: O jogador descobre que um inimigo específico pode ser usado como plataforma se atingido de certa forma.</p>
+                        </div>
+                    </div>
+                `,
+                viz: `
+                    <div class="w-full max-w-lg space-y-8">
+                        <h4 class="font-bold uppercase text-xs tracking-widest text-center">Decomposição Visual da Sala de Horror</h4>
+                        <div class="h-64 w-full border-2 border-ink bg-parchment relative overflow-hidden rounded-lg">
+                            <!-- Visual composition diagram using divs -->
+                            <div class="absolute bottom-0 left-0 w-full h-1/4 bg-slate/20"></div> <!-- Ground -->
+                            <div class="absolute top-0 right-0 w-1/3 h-full bg-ink/40"></div> <!-- Shadow/Occlusion -->
+                            <div class="absolute bottom-1/4 left-1/4 w-4 h-12 bg-blood/50 blur-sm"></div> <!-- Item/Baite -->
+                            <div class="absolute bottom-1/4 right-0 w-20 h-24 bg-ink"></div> <!-- Pillar (Hiding enemy) -->
+                            
+                            <div class="absolute top-4 left-4 text-[8px] text-ink font-bold">PLANO DE FUNDO (Lore)</div>
+                            <div class="absolute bottom-12 right-24 text-[8px] text-blood font-bold">O INIMIGO OCULTO</div>
+                            <div class="absolute top-1/2 left-8 text-[8px] text-slate font-bold">ÁREA DE CONFORTO (Luz)</div>
+                        </div>
+                        <div class="bg-blood/5 p-4 rounded text-xs text-slate">
+                            <strong>Princípio de Medo:</strong> O item (baite) está em uma área iluminada, mas o jogador deve passar por um pilar (oclusão) que esconde um inimigo. O design força o jogador a entrar na zona de perigo antes de identificá-lo.
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Capítulo IV: Psicometria da Tensão",
+                indicator: "Capítulo IV: O Ciclo de Estresse",
+                theory: `
+                    <h2 class="text-3xl font-serif font-bold text-ink mb-4">Modelagem do Estresse</h2>
+                    <p class="text-slate leading-relaxed mb-4">
+                        O Level Design em fantasia sombria não é sobre diversão constante, é sobre <strong>distribuição de alívio</strong>. Em <em>Fear & Hunger</em>, o save point é raro e custoso.
+                    </p>
+                    <h3 class="text-xl font-bold mb-2">A Curva de Ansiedade</h3>
+                    <p class="text-slate mb-6">
+                        A cada sala avançada, o valor "psicológico" da morte aumenta. Se o jogador morre na sala 1, o estresse é 0. Se morre na sala 20, o estresse é 100. O level design deve inserir "Válvulas de Escape" (Checkpoints/Atalhos) no topo da curva.
+                    </p>
+                    <div class="space-y-4 text-sm">
+                        <p><strong>A. Fase de Incursão:</strong> Tensão Linear.</p>
+                        <p><strong>B. Fase de Pânico:</strong> Recursos baixos, inimigos novos. Tensão Exponencial.</p>
+                        <p><strong>C. Fase de Catarse:</strong> Descoberta do atalho ou chefe derrotado. Queda abrupta da tensão.</p>
+                    </div>
+                `,
+                viz: `
+                    <div class="w-full space-y-6">
+                        <div class="glass-panel p-6 rounded-lg">
+                            <h4 class="text-center font-bold mb-4 uppercase text-xs tracking-widest">Modelo de Tensão Acumulada</h4>
+                            <div class="chart-container">
+                                <canvas id="tensionChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="flex justify-around text-[10px] uppercase font-bold text-slate">
+                            <span>Santuário</span>
+                            <span>Exploração</span>
+                            <span>Crise</span>
+                            <span>Shortcut</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Capítulo V: Narrativa Ambiental",
+                indicator: "Capítulo V: O Silêncio das Pedras",
+                theory: `
+                    <h2 class="text-3xl font-serif font-bold text-ink mb-4">Silent Storytelling</h2>
+                    <p class="text-slate leading-relaxed mb-4">
+                        O cenário é o seu narrador principal. Em <em>Dark Souls</em>, você não lê a história; você a <strong>testemunha</strong> através de cadáveres posicionados e arquitetura destruída.
+                    </p>
+                    <h3 class="text-xl font-bold mb-4 italic">As Três Camadas do Cenário</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-slate/10 rounded">
+                            <h4 class="font-bold text-sm">1. Camada Histórica</h4>
+                            <p class="text-xs">O propósito original daquela sala (ex: uma biblioteca real). Mostra o que o mundo <em>foi</em>.</p>
+                        </div>
+                        <div class="p-4 bg-blood/10 rounded">
+                            <h4 class="font-bold text-sm">2. Camada da Tragédia</h4>
+                            <p class="text-xs">Sinais da queda (ex: sangue nas estantes, livros queimados). Mostra o que aconteceu.</p>
+                        </div>
+                        <div class="p-4 bg-ink/10 rounded">
+                            <h4 class="font-bold text-sm">3. Camada do Gameplay</h4>
+                            <p class="text-xs">Itens, inimigos e obstáculos. O que o mundo <em>é</em> agora.</p>
+                        </div>
+                    </div>
+                `,
+                viz: `
+                    <div class="w-full h-full flex flex-col items-center justify-center">
+                        <h4 class="font-bold mb-6 uppercase text-xs tracking-widest">Correlação: Distância vs. Letalidade</h4>
+                        <div id="scatterPlot" class="w-full h-[400px]"></div>
+                        <p class="text-xs text-slate text-center max-w-md mt-4">
+                            Este gráfico de dispersão mostra como a densidade de perigos aumenta à medida que o jogador se afasta de zonas seguras, forçando a decisão de "Risco vs. Recompensa".
+                        </p>
+                    </div>
+                `
+            }
+        ];
+
+        let currentChapter = 0;
+        let radarChartInstance = null;
+        let tensionChartInstance = null;
+
+        function changeChapter(idx) {
+            currentChapter = idx;
+            
+            // UI Updates
+            document.querySelectorAll('.chapter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${idx}`).classList.add('active');
+            document.getElementById('chapter-indicator').innerText = chapterData[idx].indicator;
+            
+            // Content Update
+            const theoryArea = document.getElementById('content-area');
+            theoryArea.innerHTML = chapterData[idx].theory;
+            
+            const vizArea = document.getElementById('viz-area');
+            vizArea.innerHTML = chapterData[idx].viz;
+
+            // Chart Re-initialization
+            setTimeout(() => {
+                if (idx === 0) initRadarChart();
+                if (idx === 3) initTensionChart();
+                if (idx === 4) initScatterPlot();
+            }, 100);
+        }
+
+        function initRadarChart() {
+            const ctx = document.getElementById('radarChart');
+            if (!ctx) return;
+            
+            if (radarChartInstance) radarChartInstance.destroy();
+            
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Opressão', 'Punição', 'Kinaesthetics', 'Exploração', 'RPG/Atributos', 'Terror'],
+                    datasets: [{
+                        label: 'Metroidvania Tradicional',
+                        data: [4, 3, 9, 8, 5, 3],
+                        backgroundColor: 'rgba(74, 85, 104, 0.2)',
+                        borderColor: 'rgba(74, 85, 104, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Seu Projeto (Souls-vania)',
+                        data: [10, 9, 5, 9, 8, 10],
+                        backgroundColor: 'rgba(99, 12, 12, 0.4)',
+                        borderColor: 'rgba(99, 12, 12, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 10,
+                            ticks: { display: false },
+                            grid: { color: 'rgba(30, 30, 30, 0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        function initTensionChart() {
+            const ctx = document.getElementById('tensionChart');
+            if (!ctx) return;
+
+            if (tensionChartInstance) tensionChartInstance.destroy();
+
+            tensionChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['0m', '100m', '200m', '300m', '400m', '500m', '600m'],
+                    datasets: [{
+                        label: 'Tensão Psicológica (Medo)',
+                        data: [5, 15, 30, 60, 95, 20, 10],
+                        borderColor: '#630C0C',
+                        backgroundColor: 'rgba(99, 12, 12, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#1E1E1E'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { display: false, max: 110 },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function initScatterPlot() {
+            const container = document.getElementById('scatterPlot');
+            if (!container) return;
+
+            const trace1 = {
+                x: [10, 50, 80, 120, 150, 200, 250, 300, 350, 400, 450, 500],
+                y: [2, 5, 4, 10, 15, 25, 40, 60, 55, 80, 95, 5],
+                mode: 'markers',
+                type: 'scatter',
+                name: 'Inimigos/Armadilhas',
+                marker: { size: 12, color: '#630C0C' }
+            };
+
+            const layout = {
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                showlegend: false,
+                margin: { t: 20, b: 40, l: 40, r: 20 },
+                xaxis: { title: 'Distância do Ponto de Save (m)', gridcolor: '#eee' },
+                yaxis: { title: 'Letalidade', gridcolor: '#eee' }
+            };
+
+            Plotly.newPlot('scatterPlot', [trace1], layout, {responsive: true, displayModeBar: false});
+        }
+
+        // Initialize Chapter 0 on load
+        window.onload = () => changeChapter(0);
+    </script>
+</body>
+</html>
